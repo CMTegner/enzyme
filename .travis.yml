@@ -10,9 +10,9 @@ before_install:
   - 'if [ "${TRAVIS_NODE_VERSION}" != "0.6" ] && [ "${TRAVIS_NODE_VERSION}" != "0.9" ]; then npm install -g npm; fi'
 before_script:
   - "sh install-relevant-react.sh"
-  - export CHROME_BIN=chromium-browser
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+  - if [ $KARMA == 1 ]; then export CHROME_BIN=chromium-browser; fi
+  - if [ $KARMA == 1 ]; then export DISPLAY=:99.0; fi
+  - if [ $KARMA == 1 ]; then sh -e /etc/init.d/xvfb start; fi
 script:
   - 'if [ -z "$REACT" ] && [ "${TRAVIS_NODE_VERSION}" = "4" ]; then npm run test:env -- "${EXAMPLE}" ; elif [ -z "$REACT" ]; then echo "Test Skipped" ; elif [ $KARMA == 1 ]; then npm run test:karma -- --single-run; elif [ "${TRAVIS_NODE_VERSION}" = "4" ]; then npm run lint && npm run travis ; elif [ "${TRAVIS_NODE_VERSION}" = "0.12" ]; then npm run travis ; else npm test ; fi'
 after_script:
