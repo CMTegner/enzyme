@@ -8,15 +8,22 @@ node_js:
 before_install:
   - 'if [ "${TRAVIS_NODE_VERSION}" != "0.9" ]; then case "$(npm --version)" in 1.*) npm install -g npm@1.4.28 ;; 2.*) npm install -g npm@2 ;; esac ; fi'
   - 'if [ "${TRAVIS_NODE_VERSION}" != "0.6" ] && [ "${TRAVIS_NODE_VERSION}" != "0.9" ]; then npm install -g npm; fi'
-before_script: "sh install-relevant-react.sh"
+before_script:
+  - "sh install-relevant-react.sh"
+  - export CHROME_BIN=chromium-browser
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
 script:
-  - 'if [ -z "$REACT" ] && [ "${TRAVIS_NODE_VERSION}" = "4" ]; then npm run test:env -- "${EXAMPLE}" ; elif [ -z "$REACT" ]; then echo "Test Skipped" ; elif [ "${TRAVIS_NODE_VERSION}" = "4" ]; then npm run lint && npm run travis ; elif [ "${TRAVIS_NODE_VERSION}" = "0.12" ]; then npm run travis ; else npm test ; fi'
+  - 'if [ -z "$REACT" ] && [ "${TRAVIS_NODE_VERSION}" = "4" ]; then npm run test:env -- "${EXAMPLE}" ; elif [ -z "$REACT" ]; then echo "Test Skipped" ; elif [ $KARMA == 1 ]; then npm run test:karma -- --single-run; elif [ "${TRAVIS_NODE_VERSION}" = "4" ]; then npm run lint && npm run travis ; elif [ "${TRAVIS_NODE_VERSION}" = "0.12" ]; then npm run travis ; else npm test ; fi'
 after_script:
   - 'if [ "${TRAVIS_NODE_VERSION}" = "4" ] || [ "${TRAVIS_NODE_VERSION}" = "0.12" ]; then cat ./coverage/lcov.info | ./node_modules/.bin/coveralls ; fi'
 env:
   - REACT=0.13
   - REACT=0.14
   - REACT=15
+  - REACT=0.13 KARMA=1
+  - REACT=0.14 KARMA=1
+  - REACT=15 KARMA=1
   - EXAMPLE=mocha
   - EXAMPLE=karma
   - EXAMPLE=react-native
@@ -26,6 +33,30 @@ sudo: false
 matrix:
   fast_finish: true
   exclude:
+  - node_js: "6"
+    env: REACT=0.13 KARMA=1
+  - node_js: "6"
+    env: REACT=0.14 KARMA=1
+  - node_js: "6"
+    env: REACT=15 KARMA=1
+  - node_js: "5"
+    env: REACT=0.13 KARMA=1
+  - node_js: "5"
+    env: REACT=0.14 KARMA=1
+  - node_js: "5"
+    env: REACT=15 KARMA=1
+  - node_js: "0.12"
+    env: REACT=0.13 KARMA=1
+  - node_js: "0.12"
+    env: REACT=0.14 KARMA=1
+  - node_js: "0.12"
+    env: REACT=15 KARMA=1
+  - node_js: "0.10"
+    env: REACT=0.13 KARMA=1
+  - node_js: "0.10"
+    env: REACT=0.14 KARMA=1
+  - node_js: "0.10"
+    env: REACT=15 KARMA=1
   - node_js: "5"
     env: EXAMPLE=mocha
   - node_js: "5"
